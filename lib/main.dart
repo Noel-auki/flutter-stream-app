@@ -31,12 +31,12 @@ class MainPage extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => GoLivePage()),
-                );
-                  // MethodChannel('com.example.ivs/broadcast')
-                  //     .invokeMethod('golive');
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => GoLivePage()),
+                // );
+                MethodChannel('com.example.ivs/broadcast')
+                    .invokeMethod('golive');
               },
               child: Text('Go Live'),
             ),

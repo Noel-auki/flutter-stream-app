@@ -9,6 +9,7 @@ import com.amazonaws.ivs.broadcast.Presets
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.util.Calendar
 
 class MainActivity : FlutterActivity() {
     private var broadcastSession: BroadcastSession? = null
@@ -18,25 +19,28 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
-                if (call.method == "startStream") {
-                    val ingestEndpoint = call.argument<String>("ingestEndpoint")
-                    val streamKey = call.argument<String>("streamKey")
-                    startBroadcastSession(ingestEndpoint, streamKey)
-                    result.success("Stream started")
-                } else if (call.method == "golive"){
-                    val intent = Intent(this, GoLiveActivity::class.java)
-                    startActivity(intent)
-                    result.success("Navigating to Go Live")
-                } else if (call.method == "stopStream") {
-                    stopBroadcastSession()
-                    result.success("Stream stopped")
-                } else if (call.method == "watchLive") {
-                    val intent = Intent(this, WatchLiveActivity::class.java)
-                    startActivity(intent)
-                    result.success("Navigating to Watch Live")
-                 }
-                else {
-                    result.notImplemented()
+                when (call.method) {
+                    "startStream" -> {
+                        val ingestEndpoint = call.argument<String>("ingestEndpoint")
+                        val streamKey = call.argument<String>("streamKey")
+                        startBroadcastSession(ingestEndpoint, streamKey)
+                        result.success("Stream started")
+                    }
+                    "golive" -> {
+                        val intent = Intent(this, GoLiveActivity::class.java)
+                        startActivity(intent)
+                        result.success("Navigating to Go Live")
+                    }
+                    "stopStream" -> {
+                        stopBroadcastSession()
+                        result.success("Stream stopped")
+                    }
+                    "watchLive" -> {
+                        val intent = Intent(this, WatchLiveActivity::class.java)
+                        startActivity(intent)
+                        result.success("Navigating to Watch Live")
+                    }
+                    else -> result.notImplemented()
                 }
             }
     }
@@ -62,7 +66,7 @@ class MainActivity : FlutterActivity() {
 
             broadcastSession!!.awaitDeviceChanges {
                 for (device in broadcastSession!!.listAttachedDevices()) {
-                    if (device.descriptor.type=== Device.Descriptor.DeviceType.CAMERA) {
+                    if (device.descriptor.type === Device.Descriptor.DeviceType.CAMERA) {
                         // The preview can be set up here if needed
                     }
                 }
@@ -70,10 +74,40 @@ class MainActivity : FlutterActivity() {
 
             val url = "rtmps://$ingestEndpoint/app"
             broadcastSession!!.start(url, streamKey)
+
+            // Send timestamp as timed metadata
+            sendTimestampMetadata()
+
         } catch (e: BroadcastException) {
             Log.e(TAG, "Error starting broadcast session", e)
         }
     }
+
+    private fun sendTimestampMetadata() {
+        val calendar = Calendar.getInstance()
+        val hours = calendar.get(Calendar.HOUR_OF_DAY)
+        val minutes = calendar.get(Calendar.MINUTE)
+        val seconds = calendar.get(Calendar.SECOND)
+        val milliseconds = calendar.get(Calendar.MILLISECOND)
+
+        val timestamp = String.format(
+            "%02d:%02d:%02d.%03d",
+            hours,
+            minutes,
+            seconds,
+            milliseconds
+        )
+
+        val metadata = "timestamp:$timestamp"
+        val success = broadcastSession?.sendTimedMetadata(metadata)
+        if (success == true) {
+            Log.d(TAG, "Sent metadata: $metadata")
+        } else {
+            Log.e(TAG, "Failed to send metadata: $metadata")
+        }
+    }
+
+
 
     private fun stopBroadcastSession() {
         if (broadcastSession != null) {
@@ -90,6 +124,6 @@ class MainActivity : FlutterActivity() {
 
     companion object {
         private const val CHANNEL = "com.example.ivs/broadcast"
-        private const val TAG = "IVSBroadcast"
+        const val TAG = "IVSBroadcast"
     }
 }

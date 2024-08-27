@@ -34,8 +34,8 @@ class _GoLivePageState extends State<GoLivePage> {
   Future<void> _startStream() async {
     try {
       final result = await platform.invokeMethod('startStream', {
-        'ingestEndpoint': '937a5aa6b93e.global-contribute.live-video.net',
-        'streamKey': 'sk_us-west-2_nc10OlKXFlCD_2OYYZpWu7sPji9uTKOWVkBn3Fa830J',
+        'ingestEndpoint': '3893e27cd44d.global-contribute.live-video.net',
+        'streamKey': 'sk_us-east-1_EHzA24d29E5F_RSdCke127kxiEFc5iNlXofzzIkWFRL',
       });
       print('Stream started: $result');
       setState(() {

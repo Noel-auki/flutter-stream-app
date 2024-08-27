@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.amazonaws.ivs.broadcast.*
+import com.example.flutter_ivs_streaming.MainActivity.Companion
+import java.util.Calendar
 
 class GoLiveActivity : AppCompatActivity() {
     private lateinit var startStreamButton: Button
@@ -82,9 +84,10 @@ class GoLiveActivity : AppCompatActivity() {
     }
 
     private fun startStreaming() {
-        val streamKey = "sk_us-west-2_nc10OlKXFlCD_2OYYZpWu7sPji9uTKOWVkBn3Fa830J"
-        val rtmpsUrl = "rtmps://937a5aa6b93e.global-contribute.live-video.net:443/app"
+        val streamKey = "sk_us-east-1_EHzA24d29E5F_RSdCke127kxiEFc5iNlXofzzIkWFRL"
+        val rtmpsUrl = "rtmps://3893e27cd44d.global-contribute.live-video.net:443/app/"
         broadcastSession.start(rtmpsUrl, streamKey)
+        sendTimestampMetadata()
         startStreamButton.text = "Stop Stream"
         isStreaming = true
     }
@@ -94,7 +97,29 @@ class GoLiveActivity : AppCompatActivity() {
         startStreamButton.text = "Start Stream"
         isStreaming = false
     }
+    private fun sendTimestampMetadata() {
+        val calendar = Calendar.getInstance()
+        val hours = calendar.get(Calendar.HOUR_OF_DAY)
+        val minutes = calendar.get(Calendar.MINUTE)
+        val seconds = calendar.get(Calendar.SECOND)
+        val milliseconds = calendar.get(Calendar.MILLISECOND)
 
+        val timestamp = String.format(
+            "%02d:%02d:%02d.%03d",
+            hours,
+            minutes,
+            seconds,
+            milliseconds
+        )
+
+        val metadata = "timestamp:$timestamp"
+        val success = broadcastSession?.sendTimedMetadata(metadata)
+        if (success == true) {
+            Log.d(MainActivity.TAG, "Sent metadata: $metadata")
+        } else {
+            Log.e(MainActivity.TAG, "Failed to send metadata: $metadata")
+        }
+    }
     private fun swapCamera() {
         for (desc in BroadcastSession.listAvailableDevices(applicationContext)) {
             if (desc.type == Device.Descriptor.DeviceType.CAMERA && desc.position != currentCamera.descriptor.position) {
