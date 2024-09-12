@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Live Stream App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       home: MainPage(),
     );
@@ -31,10 +32,6 @@ class MainPage extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => GoLivePage()),
-                // );
                 MethodChannel('com.example.ivs/broadcast')
                     .invokeMethod('golive');
               },

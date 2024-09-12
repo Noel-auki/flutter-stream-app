@@ -59,6 +59,9 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.8.1'
     implementation 'com.amazonaws:ivs-player:1.30.0'
     implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.1'
+    implementation 'com.arthenica:ffmpeg-kit-full:5.1.LTS'
+    implementation 'com.google.android.exoplayer:exoplayer:2.19.0'
 }
 
 // Exclude conflicting Kotlin versions
